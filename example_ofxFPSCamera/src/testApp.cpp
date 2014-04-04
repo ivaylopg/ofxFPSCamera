@@ -21,6 +21,9 @@ void testApp::setup(){
     camera.disableMove()                                // Disables both mouse and keyboard control
     camera.enableMove()                                 // Enables both mouse and keyboard control
      
+    camera.disableStrafe()                              // Disables left/right strafe (A/D or left/right arrow)
+    camera.enableStrafe()                               // Enables left/right strafe (on by default)
+     
     camera.setCamHeight(float ch);                      // Sets camera y-height
      
     camera.target(ofVec3f v);                           // Sets look target as a vector from current camera position

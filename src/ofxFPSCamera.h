@@ -54,6 +54,9 @@ class ofxFPSCamera : public ofCamera {
     void enableMove();
     void disableMove();
     
+    void enableStrafe();
+    void disableStrafe();
+    
 
     
     void setCamHeight(float ch);
@@ -73,6 +76,7 @@ class ofxFPSCamera : public ofCamera {
 protected:
     
 	bool eventsRegistered;
+    bool strafe;
     
 	ofVec3f currentUp;
 	ofVec3f currLookTarget;

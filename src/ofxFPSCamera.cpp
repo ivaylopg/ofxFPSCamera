@@ -50,6 +50,7 @@ ofxFPSCamera::ofxFPSCamera() {
     back = false;
     left = false;
     rigt = false;
+    strafe = true;
 }
 ofxFPSCamera::~ofxFPSCamera(){
     if(eventsRegistered){
@@ -119,7 +120,7 @@ void ofxFPSCamera::update(ofEventArgs& args){
 			positionChanged = true;
 		}
 		
-		if(ofGetKeyPressed('a') || (useArrowKeys && ofGetKeyPressed(OF_KEY_LEFT)) ){
+		if((ofGetKeyPressed('a') || (useArrowKeys && ofGetKeyPressed(OF_KEY_LEFT))) && strafe ){
             if (easeIn) {
                 truck(-speedMod);
                 speedMod+=accel;
@@ -130,7 +131,7 @@ void ofxFPSCamera::update(ofEventArgs& args){
 			positionChanged = true;
 		}
 		
-		if(ofGetKeyPressed('d') || (useArrowKeys && ofGetKeyPressed(OF_KEY_RIGHT)) ){
+		if((ofGetKeyPressed('d') || (useArrowKeys && ofGetKeyPressed(OF_KEY_RIGHT))) && strafe ){
             if (easeIn) {
                 truck(speedMod);
                 speedMod+=accel;
@@ -315,6 +316,14 @@ void ofxFPSCamera::keyReleased(ofKeyEventArgs& args){
             speedMod = 0.1;
         }
     }
+}
+
+void ofxFPSCamera::enableStrafe(){
+    strafe = true;
+}
+
+void ofxFPSCamera::disableStrafe(){
+    strafe = false;
 }
 
 
