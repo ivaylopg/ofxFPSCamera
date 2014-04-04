@@ -49,6 +49,10 @@ class ofxFPSCamera : public ofCamera {
     void reset(float x, float y, float z, float h);
     void reset(ofVec3f v);
     void reset(ofVec3f v, float h);
+    void target(ofVec3f v);
+    ofVec3f getTarget();
+    void enableMove();
+    void disableMove();
     
 
     
@@ -64,6 +68,7 @@ class ofxFPSCamera : public ofCamera {
     float accel;
     float speedMod;
     bool easeIn;
+    
     
 protected:
     
@@ -82,5 +87,11 @@ protected:
 	bool unsavedChanges;
 	
 	string cameraPositionFile;
+    
+    bool movKey;
+    bool forw;
+    bool back;
+    bool left;
+    bool rigt;
 	
 };

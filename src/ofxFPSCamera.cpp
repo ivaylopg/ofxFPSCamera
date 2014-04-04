@@ -44,6 +44,12 @@ ofxFPSCamera::ofxFPSCamera() {
     easeIn = true;
     speedMod = 0.1;
     accel = 0.3;
+    
+    movKey = false;
+    forw = false;
+    back = false;
+    left = false;
+    rigt = false;
 }
 ofxFPSCamera::~ofxFPSCamera(){
     if(eventsRegistered){
@@ -140,8 +146,15 @@ void ofxFPSCamera::update(ofEventArgs& args){
 	if(positionChanged){
 		currLookTarget = getPosition() + getLookAtDir();
 	}
-
-    ofVec2f mouse( ofGetMouseX(), ofGetMouseY() );
+    
+    ofVec2f mouse;
+    if (usemouse) {
+        mouse = ofVec2f(ofGetMouseX(), ofGetMouseY());
+    } else {
+        mouse = ofVec2f(0, 0);
+    }
+    
+    //ofVec2f mouse( ofGetMouseX(), ofGetMouseY() );
 	if(!justResetAngles){
 		if(usemouse){
             float dx = (mouse.x - lastMouse.x) * sensitivityX;
@@ -188,7 +201,9 @@ void ofxFPSCamera::update(ofEventArgs& args){
     // Infinite mouse AKA don't limit mouse at ends of screen. This needs improvement.
 
     #if defined( TARGET_OSX )
-    if (usemouse && !keepTurning && ofGetMouseX() >= (ofGetScreenWidth() - ofGetWindowPositionX())) {
+    //cout << -1 * ofGetWindowPositionX() << " : " << ofGetMouseX() << " : " << (ofGetScreenWidth() - ofGetWindowPositionX()) << endl;
+    if (usemouse && !keepTurning && ofGetMouseX() >= (ofGetScreenWidth() - ofGetWindowPositionX())-5 && ofGetElapsedTimeMillis()>2000) {
+        //cout << "!!!!!!!!" << endl;
         CGPoint point;
         point.y = ofGetWindowPositionY() + ofGetMouseY();
         point.x = ofGetWindowPositionX() + ofGetWidth()/2;
@@ -199,7 +214,8 @@ void ofxFPSCamera::update(ofEventArgs& args){
         mouse.y = ofGetMouseY();
         justResetAngles = true;
     }
-    if (usemouse && !keepTurning && ofGetMouseX() <= -1 * (ofGetWindowPositionX())) {
+    if (usemouse && !keepTurning && ofGetMouseX() <= -1 * (ofGetWindowPositionX()-5) && ofGetElapsedTimeMillis()>2000) {
+        //cout << ofGetMouseY() << endl;
         CGPoint point;
         point.y = ofGetWindowPositionY() + ofGetMouseY();
         point.x = ofGetWindowPositionX() + ofGetWidth()/2;
@@ -216,14 +232,14 @@ void ofxFPSCamera::update(ofEventArgs& args){
     // I haven't tested the code below on Windows yet.
     // CGWarpMouseCursorPosition(point) will not work, but I am told that SetCursorPos(x, y) should work instead...
     
-//    if (usemouse && !keepTurning && ofGetMouseX() >= (ofGetScreenWidth() - ofGetWindowPositionX())) {
+//    if (usemouse && !keepTurning && ofGetMouseX() >= (ofGetScreenWidth() - ofGetWindowPositionX())-5 && ofGetElapsedTimeMillis()>2000) {
 //        SetCursorPos((ofGetWindowPositionX() + ofGetWidth()/2), (ofGetWindowPositionY() + ofGetMouseY()));
 //        lastMouse.x = ofGetMouseX();
 //        mouse.x = ofGetMouseX();
 //        mouse.y = ofGetMouseY();
 //        justResetAngles = true;
 //    }
-//    if (usemouse && !keepTurning && ofGetMouseX() <= -1 * (ofGetWindowPositionX())) {
+//    if (usemouse && !keepTurning && ofGetMouseX() <= -1 * (ofGetWindowPositionX()-5) && ofGetElapsedTimeMillis()>2000) {
 //        SetCursorPos((ofGetWindowPositionX() + ofGetWidth()/2), (ofGetWindowPositionY() + ofGetMouseY()));
 //        lastMouse.x = ofGetMouseX();
 //        mouse.x = ofGetMouseX();
@@ -259,14 +275,43 @@ void ofxFPSCamera::update(ofEventArgs& args){
 }
 
 void ofxFPSCamera::keyPressed(ofKeyEventArgs& args){
+    if ((args.key == 119 && !useArrowKeys) || (args.key == OF_KEY_UP && useArrowKeys)) {
+        forw = true;
+    }
+    if ((args.key == 97 && !useArrowKeys) || (args.key == OF_KEY_DOWN && useArrowKeys)) {
+        back = true;
+    }
+    if ((args.key == 115 && !useArrowKeys) || (args.key == OF_KEY_LEFT && useArrowKeys)) {
+        left = true;
+    }
+    if ((args.key == 100 && !useArrowKeys) || (args.key == OF_KEY_RIGHT && useArrowKeys)) {
+        rigt = true;
+    }
+    
+    if (forw || back || left || rigt) {
+        movKey = true;
+    }
 }
 
 void ofxFPSCamera::keyReleased(ofKeyEventArgs& args){
     if (easeIn) {
-        if ((args.key == 119 || args.key == 97 || args.key == 115 || args.key == 100) && !useArrowKeys) {
-            speedMod = 0.1;
+        if ((args.key == 119 && !useArrowKeys) || (args.key == OF_KEY_UP && useArrowKeys)) {
+            forw = false;
         }
-        if ((args.key == OF_KEY_UP || args.key == OF_KEY_DOWN || args.key == OF_KEY_LEFT || args.key == OF_KEY_RIGHT) && useArrowKeys) {
+        if ((args.key == 97 && !useArrowKeys) || (args.key == OF_KEY_DOWN && useArrowKeys)) {
+            back = false;
+        }
+        if ((args.key == 115 && !useArrowKeys) || (args.key == OF_KEY_LEFT && useArrowKeys)) {
+            left = false;
+        }
+        if ((args.key == 100 && !useArrowKeys) || (args.key == OF_KEY_RIGHT && useArrowKeys)) {
+            rigt = false;
+        }
+        
+        if (forw || back || left || rigt) {
+            movKey = true;
+        } else {
+            movKey = false;
             speedMod = 0.1;
         }
     }
@@ -290,56 +335,82 @@ void ofxFPSCamera::setMinMaxY(float angleDown, float angleUp){
 
 void ofxFPSCamera::reset(){
     camHeight = 0.0;
-	currentUp = ofVec3f(0,1,0);
-	currLookTarget = ofVec3f(0,0,1);
     setPosition(ofVec3f(0,0,0));
+	currLookTarget = ofVec3f(0,0,1);
+    currentUp = ofVec3f(0,1,0);
+    lookAt(currLookTarget, currentUp);
     setOrientation(ofQuaternion());
 	movedManually();
 }
 
 void ofxFPSCamera::reset(float h){
     camHeight = h;
-	currentUp = ofVec3f(0,1,0);
+	setPosition(ofVec3f(0,0,0));
 	currLookTarget = ofVec3f(0,0,1);
-    setPosition(ofVec3f(0,0,0));
-    setOrientation(ofQuaternion());
+    currentUp = ofVec3f(0,1,0);
+    lookAt(currLookTarget, currentUp);
+    //setOrientation(ofQuaternion());
 	movedManually();
 }
 
 void ofxFPSCamera::reset(float x, float y, float z){
     camHeight = 0.0;
-	currentUp = ofVec3f(0,1,0);
-	currLookTarget = ofVec3f(0,0,1);
-    setPosition(ofVec3f(x,y,z));
-    setOrientation(ofQuaternion());
+	setPosition(ofVec3f(x,y,z));
+	currLookTarget = getPosition() + ofVec3f(0,0,1);
+    currentUp = ofVec3f(0,1,0);
+    lookAt(currLookTarget, currentUp);
+    //setOrientation(ofQuaternion());
 	movedManually();
 }
 
 void ofxFPSCamera::reset(float x, float y, float z, float h){
     camHeight = h;
-	currentUp = ofVec3f(0,1,0);
-	currLookTarget = ofVec3f(0,0,1);
-    setPosition(ofVec3f(x,y,z));
-    setOrientation(ofQuaternion());
+	setPosition(ofVec3f(x,y,z));
+	currLookTarget = getPosition() + ofVec3f(0,0,1);
+    currentUp = ofVec3f(0,1,0);
+    lookAt(currLookTarget, currentUp);
+    //setOrientation(ofQuaternion());
 	movedManually();
 }
 
 void ofxFPSCamera::reset(ofVec3f v){
     camHeight = 0.0;
-	currentUp = ofVec3f(0,1,0);
-	currLookTarget = ofVec3f(0,0,1);
-    setPosition(v);
-    setOrientation(ofQuaternion());
+	setPosition(v);
+	currLookTarget = getPosition() + ofVec3f(0,0,1);
+    currentUp = ofVec3f(0,1,0);
+    lookAt(currLookTarget, currentUp);
+    //setOrientation(ofQuaternion());
 	movedManually();
 }
 
 void ofxFPSCamera::reset(ofVec3f v, float h){
     camHeight = h;
-	currentUp = ofVec3f(0,1,0);
-	currLookTarget = ofVec3f(0,0,1);
-    setPosition(v);
-    setOrientation(ofQuaternion());
+	setPosition(v);
+	currLookTarget = getPosition() + ofVec3f(0,0,1);
+    currentUp = ofVec3f(0,1,0);
+    lookAt(currLookTarget, currentUp);
+    //setOrientation(ofQuaternion());
 	movedManually();
+}
+
+void ofxFPSCamera::target(ofVec3f v){
+    currLookTarget = ofVec3f(v.x,v.y,v.z);
+    lookAt(currLookTarget, currentUp);
+    movedManually();
+}
+
+ofVec3f ofxFPSCamera::getTarget(){
+    return currLookTarget;
+}
+
+void ofxFPSCamera::enableMove () {
+    usemouse = true;
+    applyTranslation = true;
+}
+
+void ofxFPSCamera::disableMove () {
+    usemouse = false;
+    applyTranslation = false;
 }
 
 

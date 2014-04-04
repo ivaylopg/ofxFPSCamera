@@ -18,6 +18,14 @@ void testApp::setup(){
      
     // Methods: ////////////////////////
      
+    camera.disableMove()                                // Disables both mouse and keyboard control
+    camera.enableMove()                                 // Enables both mouse and keyboard control
+     
+    camera.setCamHeight(float ch);                      // Sets camera y-height
+     
+    camera.target(ofVec3f v);                           // Sets look target as a vector from current camera position
+    camera.getTarget();                                 // Returns current target as an ofVec3f
+     
     camera.getPosition();                               // Returns ofVec3f of (X,Y,Z) position
     camera.setPosition(float px, float py, float pz);   // Sets camera position to (x,y,z)
     camera.setPosition(const ofVec3f &p);               // Sets camera position to ofVec3f
@@ -60,6 +68,8 @@ void testApp::setup(){
     camera.accel = 0.3;                     // if easeIn is set to TRUE, this is the rate of acceleration.
     
     *****************************************************/
+    
+    camera.target(ofVec3f(1,0,0));
 
     
     for (int i = 0; i < 50; i++) {
@@ -82,11 +92,7 @@ void testApp::draw(){
 	
 	camera.begin();
     
-    
-    
-    
-    ofPushMatrix();
-    ofRotateY(90);
+
     ofSetColor(100);
     int step = 20;
     for (int i = 0; i < step; i++) {
@@ -99,9 +105,7 @@ void testApp::draw(){
     for (int i = 0; i < 50; i++) {
         cylinders[i].drawWireframe();
     }
-    ofPopMatrix();
 
-    
     
 	camera.end();
 	
@@ -122,6 +126,7 @@ void testApp::keyPressed(int key){
     switch (key) {
         case ' ':
             camera.setPosition(0, 0, 0);
+            camera.target(ofVec3f(1,0,0));
             break;
             
         case 'f':
