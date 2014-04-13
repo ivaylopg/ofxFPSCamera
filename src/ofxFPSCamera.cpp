@@ -51,6 +51,9 @@ ofxFPSCamera::ofxFPSCamera() {
     left = false;
     rigt = false;
     strafe = true;
+    
+    clipPos = ofVec3f(0,0,0);
+    isClipped = false;
 }
 ofxFPSCamera::~ofxFPSCamera(){
     if(eventsRegistered){
@@ -141,6 +144,30 @@ void ofxFPSCamera::update(ofEventArgs& args){
             }
 			positionChanged = true;
 		}
+        
+        
+        ///////////////////////////////////////////////////
+        //
+        // ToDo: Implement method to determine clipping
+        /*
+         
+        ofVec3f curPos(getPosition());
+         
+         if (curPos.z < something) {
+            curPos.z = something;
+            clip(curPos);        
+         }
+         
+        */
+        ///////////////////////////////////////////////////
+        
+        if (isClipped) {
+            setPosition(clipPos);
+            positionChanged = true;
+            isClipped = false;
+            clipPos = ofVec3f(0,0,0);
+        }
+        
         
 	}
 	
@@ -316,6 +343,11 @@ void ofxFPSCamera::keyReleased(ofKeyEventArgs& args){
             speedMod = 0.1;
         }
     }
+}
+
+void ofxFPSCamera::clip(ofVec3f newPos){
+    clipPos = newPos;
+    isClipped = true;
 }
 
 void ofxFPSCamera::enableStrafe(){

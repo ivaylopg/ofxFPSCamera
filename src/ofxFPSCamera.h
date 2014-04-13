@@ -56,7 +56,6 @@ class ofxFPSCamera : public ofCamera {
     
     void enableStrafe();
     void disableStrafe();
-    
 
     
     void setCamHeight(float ch);
@@ -71,6 +70,10 @@ class ofxFPSCamera : public ofCamera {
     float accel;
     float speedMod;
     bool easeIn;
+    
+    void clip(ofVec3f newPos);
+    bool isClipped;
+    ofVec3f clipPos;
     
     
 protected:
